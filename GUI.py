@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import filedialog
 from PIL import Image,ImageTk
 
+
+
 class Singleton(type):
     _instances = {}
     def __call__(cls, *args, **kwargs):
@@ -9,12 +11,21 @@ class Singleton(type):
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
+
+class Picture_Data:
+
+    def __init__(self):
+        self.data = {"File Path": "", "GT File Path": "" , "GT Data": ""}
+
+
 class myUI(Frame, metaclass=Singleton):
 
     def __init__(self):
         Frame.__init__(self)
+        
         #variables
-        self.gt_label = StringVar()
+        self.gt_text_label = StringVar()
+        self.folder_picture_data = []
 
         
 
@@ -63,6 +74,8 @@ class myUI(Frame, metaclass=Singleton):
 
         self.row0_label = Label(self.master, background="white")
         self.row0_label.grid(row=0,column=0)
+        self.row2_label = Label(self.master, background="white")
+        self.row2_label.grid(row=2,column=0)
         self.column0_label = Label(self.master, background="white")
         self.column0_label.grid(row=1,column=0)
         self.column2_label = Label(self.master, background="white")
@@ -71,11 +84,17 @@ class myUI(Frame, metaclass=Singleton):
         self.column4_label.grid(row=1,column=4)
         self.column6_label = Label(self.master, background="white")
         self.column6_label.grid(row=1,column=6)
+
+
+        self.gt_text_label = Label(self.master, text="",background = "white")
+        self.gt_text_label.grid(row = 3, column=5)
+
         
 
     def openFile(self):
         self.fileName = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("png files","*.png"),("all files","*.*")))
         path = self.fileName
+
 
         if self.fileName.endswith("_gt.png"):
             image_gt = Image.open(self.fileName)
@@ -87,8 +106,7 @@ class myUI(Frame, metaclass=Singleton):
             image.thumbnail((400,301), Image.ANTIALIAS)
             image = ImageTk.PhotoImage(image)
         else:
-            #all pictures in 1360x1024
-            # 340x256
+            
             image = Image.open(self.fileName)
             image.thumbnail((400,301), Image.ANTIALIAS)
             image = ImageTk.PhotoImage(image)
@@ -118,13 +136,11 @@ class myUI(Frame, metaclass=Singleton):
         fobj = open(path.rpartition("/")[0].rpartition("/")[0]+"/gt_train.txt")
         for line in fobj:
             if line.startswith(path.rpartition("/")[2][:9]):
-                gt_data = gt_data + line[10:] +"\n"     
+                gt_data = gt_data + "Bounding Box: " + line[10:].rpartition(";")[0] + "\n Klasse: " + line[10:].rpartition(";")[2] + "\n"     
         fobj.close()
 
         #draw label that shows the ground truth data
-        self.gtLabel = Label(self, textvariable=self.gt_label)
-        self.gtLabel.grid(row=20, column=6)
-        self.gt_label.set("Ground Truth Data :\n"+gt_data)
-
+        
+        self.gt_text_label.configure(text="Ground Truth Data :\n"+gt_data)
     
     
