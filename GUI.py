@@ -133,9 +133,9 @@ class myUI(Frame, metaclass=Singleton):
 
         #get the Ground Truth Data of the Image
         gt_data = ""
-        fobj = open(path.rpartition("/")[0].rpartition("/")[0]+"/gt_train.txt")
+        fobj = open(self.fileName.rpartition("/")[0].rpartition("/")[0]+"/gt_train.txt")
         for line in fobj:
-            if line.startswith(path.rpartition("/")[2][:9]):
+            if line.startswith(self.fileName.rpartition("/")[2][:5]):
                 gt_data = gt_data + "Bounding Box: " + line[10:].rpartition(";")[0] + "\n Klasse: " + line[10:].rpartition(";")[2] + "\n"     
         fobj.close()
 
