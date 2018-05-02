@@ -75,21 +75,32 @@ class myUI(Frame, metaclass=Singleton):
 
     def openFile(self):
         self.fileName = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("png files","*.png"),("all files","*.*")))
-	    #all pictures in 1360x1024
-        # 340x256
-        image = Image.open(self.fileName)
-        image.thumbnail((400,301), Image.ANTIALIAS)
-        image = ImageTk.PhotoImage(image)
-
-        #get filename of the Ground Truth Image
         path = self.fileName
-        path = path.rpartition("/")
-        folder_path_gt = path[0] + "_gt/"
-        path_gt = path[2].rpartition(".")
-        file_path_gt= folder_path_gt + path_gt[0] + "_gt.png"
-        image_gt = Image.open(file_path_gt)
-        image_gt.thumbnail((400,301), Image.ANTIALIAS)
-        image_gt = ImageTk.PhotoImage(image_gt)
+
+        if self.fileName.endswith("_gt.png"):
+            image_gt = Image.open(self.fileName)
+            image_gt.thumbnail((400,301), Image.ANTIALIAS)
+            image_gt = ImageTk.PhotoImage(image_gt)
+
+            path = path.rpartition("/")[0].rpartition("/")[0]+"/png/"+path.rpartition("/")[2][:5]+".png"
+            image = Image.open(path)
+            image.thumbnail((400,301), Image.ANTIALIAS)
+            image = ImageTk.PhotoImage(image)
+        else:
+            #all pictures in 1360x1024
+            # 340x256
+            image = Image.open(self.fileName)
+            image.thumbnail((400,301), Image.ANTIALIAS)
+            image = ImageTk.PhotoImage(image)
+
+            #get filename of the Ground Truth Image
+            path = path.rpartition("/")
+            folder_path_gt = path[0] + "_gt/"
+            path_gt = path[2].rpartition(".")
+            file_path_gt= folder_path_gt + path_gt[0] + "_gt.png"
+            image_gt = Image.open(file_path_gt)
+            image_gt.thumbnail((400,301), Image.ANTIALIAS)
+            image_gt = ImageTk.PhotoImage(image_gt)
        
         self.original_picture2 = Canvas(self.master, width=400,height=301)
         self.original_picture2.create_image(0, 0, anchor=NW, image=image)
@@ -104,9 +115,9 @@ class myUI(Frame, metaclass=Singleton):
 
         #get the Ground Truth Data of the Image
         gt_data = ""
-        fobj = open(path[0].rpartition("/")[0]+"/gt_train.txt")
+        fobj = open(path.rpartition("/")[0].rpartition("/")[0]+"/gt_train.txt")
         for line in fobj:
-            if line.startswith(path_gt[0]):
+            if line.startswith(path.rpartition("/")[2][:9]):
                 gt_data = gt_data + line[10:] +"\n"     
         fobj.close()
 
