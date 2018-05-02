@@ -2,7 +2,6 @@ from tkinter import *
 from tkinter import filedialog
 from PIL import Image,ImageTk
 
-
 class Singleton(type):
     _instances = {}
     def __call__(cls, *args, **kwargs):
@@ -15,8 +14,7 @@ class myUI(Frame, metaclass=Singleton):
     def __init__(self):
         Frame.__init__(self)
         #variables
-        newvariable358 = IntVar()
-        plot_landmarks = IntVar()
+        self.gt_label = StringVar()
 
         
 
@@ -83,11 +81,39 @@ class myUI(Frame, metaclass=Singleton):
         image.thumbnail((400,301), Image.ANTIALIAS)
         image = ImageTk.PhotoImage(image)
 
+        #get filename of the Ground Truth Image
+        path = self.fileName
+        path = path.rpartition("/")
+        folder_path_gt = path[0] + "_gt/"
+        path_gt = path[2].rpartition(".")
+        file_path_gt= folder_path_gt + path_gt[0] + "_gt.png"
+        image_gt = Image.open(file_path_gt)
+        image_gt.thumbnail((400,301), Image.ANTIALIAS)
+        image_gt = ImageTk.PhotoImage(image_gt)
+       
         self.original_picture2 = Canvas(self.master, width=400,height=301)
         self.original_picture2.create_image(0, 0, anchor=NW, image=image)
         self.original_picture2.image = image
         self.original_picture2.grid(row=1,column=1,sticky=W)
 
+        #draw Ground Truth Image
+        self.gt_picture2 = Canvas(self.master, width=400,height=301)
+        self.gt_picture2.create_image(0, 0, anchor=NW, image=image_gt)
+        self.gt_picture2.image = image_gt
+        self.gt_picture2.grid(row=1,column=5,sticky=W)
+
+        #get the Ground Truth Data of the Image
+        gt_data = ""
+        fobj = open(path[0].rpartition("/")[0]+"/gt_train.txt")
+        for line in fobj:
+            if line.startswith(path_gt[0]):
+                gt_data = gt_data + line[10:] +"\n"     
+        fobj.close()
+
+        #draw label that shows the ground truth data
+        self.gtLabel = Label(self, textvariable=self.gt_label)
+        self.gtLabel.grid(row=20, column=6)
+        self.gt_label.set("Ground Truth Data :\n"+gt_data)
 
     
     
