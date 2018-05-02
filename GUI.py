@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import filedialog
 from PIL import Image,ImageTk
+import os
 
 
 
@@ -13,9 +14,9 @@ class Singleton(type):
 
 
 class Picture_Data:
+    
+    data = {"Name": "", "File Path": "", "GT File Path": "" , "GT Data": ""}
 
-    def __init__(self):
-        self.data = {"File Path": "", "GT File Path": "" , "GT Data": ""}
 
 
 class myUI(Frame, metaclass=Singleton):
@@ -25,7 +26,7 @@ class myUI(Frame, metaclass=Singleton):
         
         #variables
         self.gt_text_label = StringVar()
-        self.folder_picture_data = []
+        self.pictures_data = []
 
         
 
@@ -52,7 +53,7 @@ class myUI(Frame, metaclass=Singleton):
         self.FileMenu = Menu(self.top_menu)
         self.top_menu.add_cascade(label = "File", menu=self.FileMenu)
         self.FileMenu.add_command(label = "Open File", command=self.openFile)
-        self.FileMenu.add_command(label = "Open Folder")
+        self.FileMenu.add_command(label = "Open Folder", command=self.openFolder)
 
         self.EditMenu = Menu(self.top_menu)
         self.top_menu.add_cascade(label = "Edit", menu=self.EditMenu)
@@ -89,14 +90,25 @@ class myUI(Frame, metaclass=Singleton):
         self.gt_text_label = Label(self.master, text="",background = "white")
         self.gt_text_label.grid(row = 3, column=5)
 
+
+
+       
         
 
     def openFile(self):
+
+        picture = Picture_Data
+
         self.fileName = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("png files","*.png"),("all files","*.*")))
         path = self.fileName
 
+        picture.data["Name"] = path.rpartition("/")[2]
+        
 
         if self.fileName.endswith("_gt.png"):
+
+            picture.data["GT File Path"] = path
+
             image_gt = Image.open(self.fileName)
             image_gt.thumbnail((400,301), Image.ANTIALIAS)
             image_gt = ImageTk.PhotoImage(image_gt)
@@ -105,8 +117,13 @@ class myUI(Frame, metaclass=Singleton):
             image = Image.open(path)
             image.thumbnail((400,301), Image.ANTIALIAS)
             image = ImageTk.PhotoImage(image)
+            
+            picture.data["File Path"] = path
+
         else:
             
+            picture.data["File Path"] = path
+
             image = Image.open(self.fileName)
             image.thumbnail((400,301), Image.ANTIALIAS)
             image = ImageTk.PhotoImage(image)
@@ -119,6 +136,8 @@ class myUI(Frame, metaclass=Singleton):
             image_gt = Image.open(file_path_gt)
             image_gt.thumbnail((400,301), Image.ANTIALIAS)
             image_gt = ImageTk.PhotoImage(image_gt)
+
+            picture.data["GT File Path"] = file_path_gt
        
         self.original_picture2 = Canvas(self.master, width=400,height=301)
         self.original_picture2.create_image(0, 0, anchor=NW, image=image)
@@ -136,11 +155,61 @@ class myUI(Frame, metaclass=Singleton):
         fobj = open(self.fileName.rpartition("/")[0].rpartition("/")[0]+"/gt_train.txt")
         for line in fobj:
             if line.startswith(self.fileName.rpartition("/")[2][:5]):
-                gt_data = gt_data + "Bounding Box: " + line[10:].rpartition(";")[0] + "\n Klasse: " + line[10:].rpartition(";")[2] + "\n"     
+                picture.data["GT Data"] = picture.data["GT Data"] + line
+                gt_data = gt_data + "Bounding Box: " + line[10:].rpartition(";")[0] + "\n Klasse: " + line[10:].rpartition(";")[2] + "\n"
+                
         fobj.close()
 
         #draw label that shows the ground truth data
         
         self.gt_text_label.configure(text="Ground Truth Data :\n"+gt_data)
+        
+        self.pictures_data.append(picture)
     
     
+
+    def openFolder(self):
+
+        folderPath = filedialog.askdirectory()
+
+        image_listing = os.listdir(folderPath)
+
+        folder_pictures_data = []
+        
+
+
+        if folderPath.endswith("_gt"):
+            for image in image_listing:
+                picture = Picture_Data
+                picture.data["Name"] = image[:5] + ".png"
+                picture.data["File Path"] = folderPath[:-3] + image[:5] + ".png"
+                picture.data["GT File Path"] = folderPath + "/" + image
+                picture.data["GT Data"] = ""
+
+                fobj = open(folderPath.rpartition("/")[0]+"/gt_train.txt")
+                for line in fobj:
+                    if line.startswith(picture.data["Name"]):
+                        picture.data["GT Data"] = picture.data["GT Data"] + line
+                fobj.close()
+
+                folder_pictures_data.append(picture)
+                
+        else:
+            for image in image_listing:
+                picture = Picture_Data
+                picture.data["Name"] = image
+                picture.data["File Path"] = folderPath + "/" + image
+                picture.data["GT File Path"] = folderPath + "_gt/" + image[:5] + "_gt.png"
+                picture.data["GT Data"] = ""
+
+                fobj = open(folderPath.rpartition("/")[0]+"/gt_train.txt")
+                for line in fobj:
+                    if line.startswith(picture.data["Name"]):
+                        picture.data["GT Data"] = picture.data["GT Data"] + line
+                fobj.close()
+
+                folder_pictures_data.append(picture)
+
+        self.pictures_data = folder_pictures_data
+                
+
