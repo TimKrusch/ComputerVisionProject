@@ -84,9 +84,10 @@ class myUI(Frame, metaclass=Singleton):
         
         self.gt_text_label = Label(self.master, text="",background="gray80")
         self.gt_text_label.grid(row = 3, column=5)
-        self.filename_label = Label(self.master, text="",background="gray80")
-        self.filename_label.grid(row = 0, column=1)
-
+        if len(self.pictures_data)==0:
+            self.filename_label = Label(self.master, text="",background="gray80")
+            self.filename_label.grid(row = 0, column=1,sticky=W+E)
+            
         for x in self.pictures_data:
             print(x.data)
 
@@ -97,7 +98,7 @@ class myUI(Frame, metaclass=Singleton):
 
         if self.filePath.endswith("_gt.png"):
             Name = self.filePath.rpartition("/")[2][:5] + ".png"
-            FilePath = self.filePath[:-7] + ".png"
+            FilePath = self.filePath.rpartition("/")[0][:-3] + "/"+ Name
             GTFilePath = self.filePath
             GTData = ""
 
@@ -212,7 +213,7 @@ class myUI(Frame, metaclass=Singleton):
             self.forth.grid(row=0, column=1,sticky=E)
 
         #draw label that shows the image-name we are currently seeing
-        self.filename_label.configure(text="  "+Img.data["Name"])
+        self.filename_label.configure(text="  "+Img.data["Name"],background="grey94")
     
     def switchDisplayedImage(self, imageOffset):
         if (
