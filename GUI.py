@@ -13,9 +13,12 @@ class Singleton(type):
         return cls._instances[cls]
 
 
-class Picture_Data:
+class Picture_Data(object):
     
-    data = {"Name": "", "File Path": "", "GT File Path": "" , "GT Data": ""}
+    def __init__(self,name,filepath,gtfilepath,gtdata):
+        self.data = {"Name": name, "File Path": filepath, "GT File Path": gtfilepath , "GT Data": gtdata}
+
+    #data = {"Name": "", "File Path": "", "GT File Path": "" , "GT Data": ""}
 
 
 
@@ -180,36 +183,43 @@ class myUI(Frame, metaclass=Singleton):
 
         if folderPath.endswith("_gt"):
             for image in image_listing:
-                picture = Picture_Data
-                picture.data["Name"] = image[:5] + ".png"
-                picture.data["File Path"] = folderPath[:-3] + image[:5] + ".png"
-                picture.data["GT File Path"] = folderPath + "/" + image
-                picture.data["GT Data"] = ""
+                
+                Name = image[:5] + ".png"
+                FilePath = folderPath[:-3] + image[:5] + ".png"
+                GTFilePath = folderPath + "/" + image
+                GTData = ""
 
                 fobj = open(folderPath.rpartition("/")[0]+"/gt_train.txt")
                 for line in fobj:
-                    if line.startswith(picture.data["Name"]):
-                        picture.data["GT Data"] = picture.data["GT Data"] + line
+                    if line.startswith(Name):
+                        GTData = GTData + line
                 fobj.close()
 
-                folder_pictures_data.append(picture)
+                folder_pictures_data.append(Picture_Data(Name,FilePath,GTFilePath,GTData))
                 
         else:
             for image in image_listing:
-                picture = Picture_Data
-                picture.data["Name"] = image
-                picture.data["File Path"] = folderPath + "/" + image
-                picture.data["GT File Path"] = folderPath + "_gt/" + image[:5] + "_gt.png"
-                picture.data["GT Data"] = ""
+                
+                Name = image
+                FilePath = folderPath + "/" + image
+                GTFilePath = folderPath + "_gt/" + image[:5] + "_gt.png"
+                GTData = ""
 
                 fobj = open(folderPath.rpartition("/")[0]+"/gt_train.txt")
                 for line in fobj:
-                    if line.startswith(picture.data["Name"]):
-                        picture.data["GT Data"] = picture.data["GT Data"] + line
+                    if line.startswith(Name):
+                        GTData = GTData + line
                 fobj.close()
 
-                folder_pictures_data.append(picture)
+                folder_pictures_data.append(Picture_Data(Name,FilePath,GTFilePath,GTData))
+                
 
         self.pictures_data = folder_pictures_data
+        
+        for x in self.pictures_data:
+            print(x.data)
+
+
+    
                 
 
