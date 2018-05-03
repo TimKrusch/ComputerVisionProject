@@ -14,10 +14,8 @@ class Singleton(type):
 
 
 class Picture_Data(object):
-    
     def __init__(self,name,filepath,gtfilepath,gtdata):
         self.data = {"Name": name, "File Path": filepath, "GT File Path": gtfilepath , "GT Data": gtdata}
-
     #data = {"Name": "", "File Path": "", "GT File Path": "" , "GT Data": ""}
 
 
@@ -174,16 +172,11 @@ class myUI(Frame, metaclass=Singleton):
     def openFolder(self):
 
         folderPath = filedialog.askdirectory()
-
         image_listing = os.listdir(folderPath)
-
         folder_pictures_data = []
-        
-
 
         if folderPath.endswith("_gt"):
             for image in image_listing:
-                
                 Name = image[:5] + ".png"
                 FilePath = folderPath[:-3] + image[:5] + ".png"
                 GTFilePath = folderPath + "/" + image
@@ -215,11 +208,33 @@ class myUI(Frame, metaclass=Singleton):
                 
 
         self.pictures_data = folder_pictures_data
+
+        if len(self.pictures_data) > 0:
+            self.display_result(self.pictures_data[0])  
+
+
+    def display_result(self, Img):
+        #generate Image from filepath
+        image = Image.open(Img.data["File Path"])
+        image.thumbnail((400, 301), Image.ANTIALIAS)
+        image = ImageTk.PhotoImage(image)
+
+        self.original_picture2 = Canvas(self.master, width=400,height=301)
+        self.original_picture2.create_image(0, 0, anchor=NW, image=image)
+        self.original_picture2.image = image
+        self.original_picture2.grid(row=1,column=1,sticky=W)
+
+
+        image_gt = Image.open(Img.data["GT File Path"])
+        image_gt.thumbnail((400, 301), Image.ANTIALIAS)
+        image_gt = ImageTk.PhotoImage(image_gt)
+
+        #draw Ground Truth Image
+        self.gt_picture2 = Canvas(self.master, width=400,height=301)
+        self.gt_picture2.create_image(0, 0, anchor=NW, image=image_gt)
+        self.gt_picture2.image = image_gt
+        self.gt_picture2.grid(row=1,column=5,sticky=W)
+
+        #draw Ground Truth Data
+        self.gt_text_label.configure(text="Ground Truth Data :\n"+Img.data["GT Data"])
         
-        for x in self.pictures_data:
-            print(x.data)
-
-
-    
-                
-
