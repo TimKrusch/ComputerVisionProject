@@ -4,7 +4,6 @@ from PIL import Image,ImageTk
 import os
 
 
-
 class Singleton(type):
     _instances = {}
     def __call__(cls, *args, **kwargs):
@@ -19,7 +18,6 @@ class Picture_Data(object):
     #data = {"Name": "", "File Path": "", "GT File Path": "" , "GT Data": ""}
 
 
-
 class myUI(Frame, metaclass=Singleton):
 
     def __init__(self):
@@ -28,17 +26,17 @@ class myUI(Frame, metaclass=Singleton):
         #variables
         self.gt_text_label = StringVar()
         self.pictures_data = []
-
-        
+        self.currentDisplayedResult = 1
 
         ###### define Window properties ######
         self.master.title("Projekt-Verkehrsschildererkennung")
-        self.master.minsize(width=1000, height = 765)
-        self.master.configure(background ="white")
+        self.master.minsize(width=1500, height = 700)
+        self.master.configure(background="gray80")
         self.grid_rowconfigure(0, minsize=20)
         self.grid_rowconfigure(2, minsize=20)
         self.grid_rowconfigure(4, minsize=20)
         self.grid_rowconfigure(6, minsize=20)
+        self.grid_rowconfigure(8,minsize=2500)
         self.grid_columnconfigure(0, minsize=40)
         self.grid_columnconfigure(2, minsize=40)
         self.grid_columnconfigure(4, minsize=40)
@@ -61,9 +59,6 @@ class myUI(Frame, metaclass=Singleton):
         self.EditMenu.add_command(label = "Find Signs")
 
 
-
-       
-        
         #Labels
         self.original_picture_Label = Label(self.master, image = PhotoImage(file="gray.png"))
         self.original_picture_Label.grid(row=1,column=1,sticky=W)
@@ -74,31 +69,29 @@ class myUI(Frame, metaclass=Singleton):
         self.gt_picture_Label = Label(self.master, image = PhotoImage(file="gray.png"))
         self.gt_picture_Label.grid(row=1,column=5,sticky=E)
 
-        self.row0_label = Label(self.master, background="white")
-        self.row0_label.grid(row=0,column=0)
-        self.row2_label = Label(self.master, background="white")
-        self.row2_label.grid(row=2,column=0)
-        self.column0_label = Label(self.master, background="white")
-        self.column0_label.grid(row=1,column=0)
-        self.column2_label = Label(self.master, background="white")
-        self.column2_label.grid(row=1,column=2)
-        self.column4_label = Label(self.master, background="white")
-        self.column4_label.grid(row=1,column=4)
-        self.column6_label = Label(self.master, background="white")
-        self.column6_label.grid(row=1,column=6)
-
-
-        self.gt_text_label = Label(self.master, text="",background = "white")
+        self.row0_label = Label(self.master, background="gray80")
+        self.row0_label.grid(row=0,column=0,,sticky=N+S)
+        self.row2_label = Label(self.master, background="gray80")
+        self.row2_label.grid(row=2,column=0,,sticky=N+S)
+        self.column0_label = Label(self.master, background="gray80")
+        self.column0_label.grid(row=1,column=0,,sticky=N+S)
+        self.column2_label = Label(self.master, background="gray80")
+        self.column2_label.grid(row=1,column=2,sticky=N+S)
+        self.column4_label = Label(self.master, background="gray80")
+        self.column4_label.grid(row=1,column=4,sticky=N+S)
+        self.column6_label = Label(self.master, background="gray80")
+        self.column6_label.grid(row=1,column=6,sticky=N+S)
+        
+        self.gt_text_label = Label(self.master, text="",background="gray80")
         self.gt_text_label.grid(row = 3, column=5)
+        self.filename_label = Label(self.master, text="",background="gray80")
+        self.filename_label.grid(row = 0, column=1)
 
         for x in self.pictures_data:
             print(x.data)
 
-       
-        
 
-    def addFile(self):
-        
+    def addFile(self):        
         
         self.filePath = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("png files","*.png"),("all files","*.*")))
 
@@ -120,7 +113,7 @@ class myUI(Frame, metaclass=Singleton):
 
             Name = self.filePath.rpartition("/")[2]
             FilePath = self.filePath
-            GTFilePath = self.filePath[:-4] + "_gt.png"
+            GTFilePath = self.filePath.rpartition("/")[0] + "_gt/"+ Name[:-4] + "_gt.png"
             GTData = ""
 
             fobj = open(self.filePath.rpartition("/")[0].rpartition("/")[0] + "/gt_train.txt")
@@ -133,9 +126,8 @@ class myUI(Frame, metaclass=Singleton):
 
         self.pictures_data.append(picture)
 
-        for x in self.pictures_data:
-            print(x.data)
-
+        if len(self.pictures_data) > 0:
+            self.display_result(self.pictures_data[0])
 
 
     def openFolder(self):
@@ -187,25 +179,47 @@ class myUI(Frame, metaclass=Singleton):
     def display_result(self, Img):
         #generate Image from filepath
         image = Image.open(Img.data["File Path"])
-        image.thumbnail((400, 301), Image.ANTIALIAS)
+        image.thumbnail((500, 376), Image.ANTIALIAS)
         image = ImageTk.PhotoImage(image)
 
-        self.original_picture2 = Canvas(self.master, width=400,height=301)
+        self.original_picture2 = Canvas(self.master, width=500,height=376)
         self.original_picture2.create_image(0, 0, anchor=NW, image=image)
         self.original_picture2.image = image
         self.original_picture2.grid(row=1,column=1,sticky=W)
 
 
         image_gt = Image.open(Img.data["GT File Path"])
-        image_gt.thumbnail((400, 301), Image.ANTIALIAS)
+        image_gt.thumbnail((500, 376), Image.ANTIALIAS)
         image_gt = ImageTk.PhotoImage(image_gt)
 
         #draw Ground Truth Image
-        self.gt_picture2 = Canvas(self.master, width=400,height=301)
+        self.gt_picture2 = Canvas(self.master, width=500,height=376)
         self.gt_picture2.create_image(0, 0, anchor=NW, image=image_gt)
         self.gt_picture2.image = image_gt
         self.gt_picture2.grid(row=1,column=5,sticky=W)
 
         #draw Ground Truth Data
         self.gt_text_label.configure(text="Ground Truth Data :\n"+Img.data["GT Data"])
-        
+
+        #draw Button for iteration back through the images
+        if self.currentDisplayedResult > 1:
+            self.back = Button(self.master, text="<", command=lambda: self.switchDisplayedImage(-1))
+            self.back.grid(row=0, column=1,sticky=W)
+
+        #draw Button for iteration forward through the images
+        if self.currentDisplayedResult < len(self.pictures_data):
+            self.forth = Button(self.master, text=">", command=lambda: self.switchDisplayedImage(1))
+            self.forth.grid(row=0, column=1,sticky=E)
+
+        #draw label that shows the image-name we are currently seeing
+        self.filename_label.configure(text="  "+Img.data["Name"])
+    
+    def switchDisplayedImage(self, imageOffset):
+        if (
+                (self.currentDisplayedResult + imageOffset) <= len(self.pictures_data)
+                and (self.currentDisplayedResult + imageOffset) >= 1
+            ):
+
+            self.currentDisplayedResult += imageOffset
+            self.display_result(self.pictures_data[self.currentDisplayedResult-1])
+
