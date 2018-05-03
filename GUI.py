@@ -53,7 +53,7 @@ class myUI(Frame, metaclass=Singleton):
         self.master.config(menu = self.top_menu)
         self.FileMenu = Menu(self.top_menu)
         self.top_menu.add_cascade(label = "File", menu=self.FileMenu)
-        self.FileMenu.add_command(label = "Open File", command=self.openFile)
+        self.FileMenu.add_command(label = "Add File", command=self.addFile)
         self.FileMenu.add_command(label = "Open Folder", command=self.openFolder)
 
         self.EditMenu = Menu(self.top_menu)
@@ -91,85 +91,56 @@ class myUI(Frame, metaclass=Singleton):
         self.gt_text_label = Label(self.master, text="",background = "white")
         self.gt_text_label.grid(row = 3, column=5)
 
-
+        for x in self.pictures_data:
+            print(x.data)
 
        
         
 
-    def openFile(self):
-
-        picture = Picture_Data
-
-        self.fileName = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("png files","*.png"),("all files","*.*")))
-        path = self.fileName
-
-        picture.data["Name"] = path.rpartition("/")[2]
+    def addFile(self):
         
+        
+        self.filePath = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("png files","*.png"),("all files","*.*")))
 
-        if self.fileName.endswith("_gt.png"):
+        if self.filePath.endswith("_gt.png"):
+            Name = self.filePath.rpartition("/")[2][:5] + ".png"
+            FilePath = self.filePath[:-7] + ".png"
+            GTFilePath = self.filePath
+            GTData = ""
 
-            picture.data["GT File Path"] = path
-
-            image_gt = Image.open(self.fileName)
-            image_gt.thumbnail((400,301), Image.ANTIALIAS)
-            image_gt = ImageTk.PhotoImage(image_gt)
-
-            path = path.rpartition("/")[0].rpartition("/")[0]+"/png/"+path.rpartition("/")[2][:5]+".png"
-            image = Image.open(path)
-            image.thumbnail((400,301), Image.ANTIALIAS)
-            image = ImageTk.PhotoImage(image)
+            fobj = open(self.filePath.rpartition("/")[0].rpartition("/")[0] + "/gt_train.txt")
+            for line in fobj:
+                if line.startswith(Name):
+                    GTData = GTData + line
+            fobj.close()
             
-            picture.data["File Path"] = path
+            picture = Picture_Data(Name,FilePath,GTFilePath,GTData)
 
         else:
+
+            Name = self.filePath.rpartition("/")[2]
+            FilePath = self.filePath
+            GTFilePath = self.filePath[:-4] + "_gt.png"
+            GTData = ""
+
+            fobj = open(self.filePath.rpartition("/")[0].rpartition("/")[0] + "/gt_train.txt")
+            for line in fobj:
+                if line.startswith(Name):
+                    GTData = GTData + line
+            fobj.close()
             
-            picture.data["File Path"] = path
+            picture = Picture_Data(Name,FilePath,GTFilePath,GTData)
 
-            image = Image.open(self.fileName)
-            image.thumbnail((400,301), Image.ANTIALIAS)
-            image = ImageTk.PhotoImage(image)
-
-            #get filename of the Ground Truth Image
-            path = path.rpartition("/")
-            folder_path_gt = path[0] + "_gt/"
-            path_gt = path[2].rpartition(".")
-            file_path_gt= folder_path_gt + path_gt[0] + "_gt.png"
-            image_gt = Image.open(file_path_gt)
-            image_gt.thumbnail((400,301), Image.ANTIALIAS)
-            image_gt = ImageTk.PhotoImage(image_gt)
-
-            picture.data["GT File Path"] = file_path_gt
-       
-        self.original_picture2 = Canvas(self.master, width=400,height=301)
-        self.original_picture2.create_image(0, 0, anchor=NW, image=image)
-        self.original_picture2.image = image
-        self.original_picture2.grid(row=1,column=1,sticky=W)
-
-        #draw Ground Truth Image
-        self.gt_picture2 = Canvas(self.master, width=400,height=301)
-        self.gt_picture2.create_image(0, 0, anchor=NW, image=image_gt)
-        self.gt_picture2.image = image_gt
-        self.gt_picture2.grid(row=1,column=5,sticky=W)
-
-        #get the Ground Truth Data of the Image
-        gt_data = ""
-        fobj = open(self.fileName.rpartition("/")[0].rpartition("/")[0]+"/gt_train.txt")
-        for line in fobj:
-            if line.startswith(self.fileName.rpartition("/")[2][:5]):
-                picture.data["GT Data"] = picture.data["GT Data"] + line
-                gt_data = gt_data + "Bounding Box: " + line[10:].rpartition(";")[0] + "\n Klasse: " + line[10:].rpartition(";")[2] + "\n"
-                
-        fobj.close()
-
-        #draw label that shows the ground truth data
-        
-        self.gt_text_label.configure(text="Ground Truth Data :\n"+gt_data)
-        
         self.pictures_data.append(picture)
-    
-    
+
+        for x in self.pictures_data:
+            print(x.data)
+
+
 
     def openFolder(self):
+
+        self.pictures_data = []
 
         folderPath = filedialog.askdirectory()
         image_listing = os.listdir(folderPath)
