@@ -220,9 +220,6 @@ class myUI(Frame, metaclass=Singleton):
             self.edited_picture_Label2.image = image_edit
             self.edited_picture_Label2.grid(row=1,column=3,sticky=W)
 
-
-
-
         #draw Ground Truth Data
         self.gt_text_label.configure(text="Ground Truth Data :\n"+Img.data["GT Data"])
 
@@ -252,6 +249,11 @@ class myUI(Frame, metaclass=Singleton):
     def identify_signs(self):
         
         edit_folder_path = self.pictures_data[0].data["File Path"].rpartition("/")[0].rpartition("/")[0]+"/edit_folder"
+        if os.path.isdir(edit_folder_path):
+            result = messagebox.askquestion("Delete", "There is a Edit-Image-Folder! Delete it?", icon='warning')
+            if result == 'yes':
+                shutil.rmtree(self.pictures_data[0].data["File Path"].rpartition("/")[0].rpartition("/")[0]+"/edit_folder")
+        
         os.mkdir(edit_folder_path)
 
         identify(self.pictures_data,edit_folder_path)
