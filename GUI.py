@@ -1,8 +1,12 @@
 from tkinter import *
 from tkinter import filedialog
+import tkinter as tk
+from tkinter import messagebox
 from PIL import Image,ImageTk
 import os
+import shutil
 
+from identification import identify
 
 class Singleton(type):
     _instances = {}
@@ -13,8 +17,8 @@ class Singleton(type):
 
 
 class Picture_Data(object):
-    def __init__(self,name,filepath,gtfilepath,gtdata):
-        self.data = {"Name": name, "File Path": filepath, "GT File Path": gtfilepath , "GT Data": gtdata}
+    def __init__(self,name,filepath,gtfilepath,gtdata,edit_filepath):
+        self.data = {"Name": name, "File Path": filepath, "GT File Path": gtfilepath , "GT Data": gtdata, "Edit Img":edit_filepath}
     #data = {"Name": "", "File Path": "", "GT File Path": "" , "GT Data": ""}
 
 
@@ -22,7 +26,7 @@ class myUI(Frame, metaclass=Singleton):
 
     def __init__(self):
         Frame.__init__(self)
-        
+
         #variables
         self.gt_text_label = StringVar()
         self.pictures_data = []
@@ -30,20 +34,20 @@ class myUI(Frame, metaclass=Singleton):
 
         ###### define Window properties ######
         self.master.title("Projekt-Verkehrsschildererkennung")
-        self.master.minsize(width=1500, height = 700)
+        self.master.minsize(width = 1500, height = 700)
         self.master.configure(background="gray80")
         self.grid_rowconfigure(0, minsize=20)
         self.grid_rowconfigure(2, minsize=20)
         self.grid_rowconfigure(4, minsize=20)
         self.grid_rowconfigure(6, minsize=20)
-        self.grid_rowconfigure(8,minsize=2500)
+        self.grid_rowconfigure(8, minsize=2500)
         self.grid_columnconfigure(0, minsize=40)
         self.grid_columnconfigure(2, minsize=40)
         self.grid_columnconfigure(4, minsize=40)
         self.grid_columnconfigure(6, minsize=40)
         self.grid(sticky=W+E+N+S)
 
-        
+
         ###### define Window objects ######
 
         #Menu
@@ -56,7 +60,11 @@ class myUI(Frame, metaclass=Singleton):
 
         self.EditMenu = Menu(self.top_menu)
         self.top_menu.add_cascade(label = "Edit", menu=self.EditMenu)
-        self.EditMenu.add_command(label = "Find Signs")
+        self.EditMenu.add_command(label = "Find Signs", command=self.identify_signs)
+
+        self.CloseMenu = Menu(self.top_menu)
+        self.top_menu.add_cascade(label = "Beenden", menu=self.CloseMenu)
+        self.CloseMenu.add_command(label = "Close", command=self.closeEvent)
 
 
         #Labels
@@ -95,6 +103,7 @@ class myUI(Frame, metaclass=Singleton):
     def addFile(self):        
         
         self.filePath = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("png files","*.png"),("all files","*.*")))
+        edit_filepath = ""
 
         if self.filePath.endswith("_gt.png"):
             Name = self.filePath.rpartition("/")[2][:5] + ".png"
@@ -108,7 +117,7 @@ class myUI(Frame, metaclass=Singleton):
                     GTData = GTData + line
             fobj.close()
             
-            picture = Picture_Data(Name,FilePath,GTFilePath,GTData)
+            picture = Picture_Data(Name,FilePath,GTFilePath,GTData,edit_filepath)
 
         else:
 
@@ -123,7 +132,7 @@ class myUI(Frame, metaclass=Singleton):
                     GTData = GTData + line
             fobj.close()
             
-            picture = Picture_Data(Name,FilePath,GTFilePath,GTData)
+            picture = Picture_Data(Name,FilePath,GTFilePath,GTData,edit_filepath)
 
         self.pictures_data.append(picture)
 
@@ -134,6 +143,7 @@ class myUI(Frame, metaclass=Singleton):
     def openFolder(self):
 
         self.pictures_data = []
+        edit_filepath = ""
 
         folderPath = filedialog.askdirectory()
         image_listing = os.listdir(folderPath)
@@ -152,7 +162,7 @@ class myUI(Frame, metaclass=Singleton):
                         GTData = GTData + line
                 fobj.close()
 
-                folder_pictures_data.append(Picture_Data(Name,FilePath,GTFilePath,GTData))
+                folder_pictures_data.append(Picture_Data(Name,FilePath,GTFilePath,GTData,edit_filepath))
                 
         else:
             for image in image_listing:
@@ -168,7 +178,7 @@ class myUI(Frame, metaclass=Singleton):
                         GTData = GTData + line
                 fobj.close()
 
-                folder_pictures_data.append(Picture_Data(Name,FilePath,GTFilePath,GTData))
+                folder_pictures_data.append(Picture_Data(Name,FilePath,GTFilePath,GTData,edit_filepath))
                 
 
         self.pictures_data = folder_pictures_data
@@ -199,6 +209,20 @@ class myUI(Frame, metaclass=Singleton):
         self.gt_picture2.image = image_gt
         self.gt_picture2.grid(row=1,column=5,sticky=W)
 
+
+        if Img.data["Edit Img"] != "" : 
+            image_edit = Image.open(Img.data["Edit Img"])
+            image_edit.thumbnail((500, 376), Image.ANTIALIAS)
+            image_edit = ImageTk.PhotoImage(image_edit)
+
+            self.edited_picture_Label2 = Canvas(self.master, width=500,height=376)
+            self.edited_picture_Label2.create_image(0, 0, anchor=NW, image=image_edit)
+            self.edited_picture_Label2.image = image_edit
+            self.edited_picture_Label2.grid(row=1,column=3,sticky=W)
+
+
+
+
         #draw Ground Truth Data
         self.gt_text_label.configure(text="Ground Truth Data :\n"+Img.data["GT Data"])
 
@@ -224,3 +248,22 @@ class myUI(Frame, metaclass=Singleton):
             self.currentDisplayedResult += imageOffset
             self.display_result(self.pictures_data[self.currentDisplayedResult-1])
 
+
+    def identify_signs(self):
+        
+        edit_folder_path = self.pictures_data[0].data["File Path"].rpartition("/")[0].rpartition("/")[0]+"/edit_folder"
+        os.mkdir(edit_folder_path)
+
+        identify(self.pictures_data,edit_folder_path)
+        
+        self.display_result(self.pictures_data[self.currentDisplayedResult-1])
+
+    def closeEvent(self):
+        
+        if len(self.pictures_data) > 0:
+            if self.pictures_data[0].data["Edit Img"] != "": 
+                result = messagebox.askquestion("Delete", "Delete the Edit-Images?", icon='warning')
+                if result == 'yes':
+                    shutil.rmtree(self.pictures_data[0].data["File Path"].rpartition("/")[0].rpartition("/")[0]+"/edit_folder")
+        self.quit()
+        self.destroy()
