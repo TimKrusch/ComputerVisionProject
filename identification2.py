@@ -38,9 +38,9 @@ def identify2(imagelist, folder_path):
                 # draw the center of the circle
                 cv2.circle(img,(i[0],i[1]),2,(0,0,255),3)
 
-        template = cv2.imread('Hauptstraße.png',0)
-        print(template)
-        template_matched = cv2.matchTemplate(image_s_blur,template, cv2.TM_CCOEFF_NORMED)
+        template = cv2.imread('hauptstrasse.png',0)
+
+        template_matched = cv2.matchTemplate(image_s,template, cv2.TM_CCOEFF)
 
         cv2.imwrite(
             folder_path + "/" + image.data["Name"][:-4] + "-edit.png", template_matched
