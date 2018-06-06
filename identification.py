@@ -15,13 +15,13 @@ def identify(imagelist, folder_path):
         # apply gamma correction and show the images
         image_edit = adjust_gamma(image_edit, gamma=5.0)
 
-        image_hsv = cv2.cvtColor(image_edit, cv2.COLOR_BGR2HSV)
+        image_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-        lower_red = np.array([0, 15, 15])
+        lower_red = np.array([0, 10, 15])
         upper_red = np.array([15, 255, 255])
         mask_red1 = cv2.inRange(image_hsv, lower_red, upper_red)
 
-        lower_red2 = np.array([160, 15, 15])
+        lower_red2 = np.array([160, 10, 15])
         upper_red2 = np.array([179, 255, 255])
         mask_red2 = cv2.inRange(image_hsv, lower_red2, upper_red2)
 
@@ -37,7 +37,7 @@ def identify(imagelist, folder_path):
         mask = cv2.bitwise_or(mask, mask_blue)
         mask = cv2.bitwise_or(mask, mask_yellow)
 
-        result = cv2.bitwise_and(image_edit,image_edit, mask= mask)
+        result2 = cv2.bitwise_and(image_edit,image_edit, mask= mask)
         mask_smooth = cv2.bilateralFilter(mask, 9, 75, 75)
         mask_edge = cv2.Canny(mask_smooth, 50, 200)
 
@@ -54,17 +54,33 @@ def identify(imagelist, folder_path):
         #cv2.rectangle(image_edit, (x, y), (x+w, y+h), (0, 255, 0), thickness=3)
 
         
+        
+        #template = cv2.imread('kreis.jpg', 0)
+        #w, h = template.shape[::-1]
+        #template = cv2.Canny(template, 50, 200)
 
-        template = cv2.imread('kreis.jpg', 0)
-        w, h = template.shape[::-1]
-        template = cv2.Canny(template, 50, 200)
+        #result = cv2.matchTemplate(result2, template, cv2.TM_CCOEFF_NORMED)
+        #min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
-        result = cv2.matchTemplate(mask, template, cv2.TM_CCOEFF_NORMED)
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+        #top_left = max_loc
+        #bottom_right = (top_left[0] + w, top_left[1] + h)
+        #cv2.rectangle(img, top_left, bottom_right, 255, 2)
+        
+        circles = cv2.HoughCircles(mask,cv2.HOUGH_GRADIENT,1,40,
+                            param1=100,param2=40,minRadius=5,maxRadius=75)
 
-        top_left = max_loc
-        bottom_right = (top_left[0] + w, top_left[1] + h)
-        cv2.rectangle(img, top_left, bottom_right, 255, 2)
+        if circles is not None:
+        
+            #print(circles)
+            #circles = np.uint64(np.around(circles))
+
+            for i in circles[0,:]:
+                # draw the outer circle
+                cv2.circle(img,(i[0],i[1]),i[2],(0,255,0),2)
+                # draw the center of the circle
+                cv2.circle(img,(i[0],i[1]),2,(0,0,255),3)
+
+
 
         cv2.imwrite(
             folder_path + "/" + image.data["Name"][:-4] + "-edit.png", img

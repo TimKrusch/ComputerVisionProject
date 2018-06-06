@@ -23,7 +23,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GUI.py" />
+    <Compile Include="identification.py" />
     <Compile Include="main.py" />
+    <Compile Include="identification2.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|PythonCore|3.6-32" />

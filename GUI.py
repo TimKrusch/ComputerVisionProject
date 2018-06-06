@@ -7,6 +7,7 @@ import os
 import shutil
 
 from identification import identify
+from identification2 import identify2
 
 class Singleton(type):
     _instances = {}
@@ -256,7 +257,7 @@ class myUI(Frame, metaclass=Singleton):
         
         os.mkdir(edit_folder_path)
 
-        identify(self.pictures_data,edit_folder_path)
+        identify2(self.pictures_data,edit_folder_path)
         
         self.display_result(self.pictures_data[self.currentDisplayedResult-1])
 
