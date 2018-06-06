@@ -20,6 +20,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="gray.png" />
+    <Content Include="Hauptstraße.png" />
+    <Content Include="kreis.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GUI.py" />

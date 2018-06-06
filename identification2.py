@@ -38,18 +38,12 @@ def identify2(imagelist, folder_path):
                 # draw the center of the circle
                 cv2.circle(img,(i[0],i[1]),2,(0,0,255),3)
 
-
-
-        ret,thresh = cv2.threshold(image_s_blur,127,255,1)
-        contours,h = cv2.findContours(thresh,1 ,1)
-        for cnt in contours:
-            approx = cv2.approxPolyDP(cnt,0.01*cv2.arcLength(cnt,True),True)
-            if len(approx)==3:
-                cv2.drawContours(img,[cnt],0,255,-1)
-
+        template = cv2.imread('Hauptstraße.png',0)
+        print(template)
+        template_matched = cv2.matchTemplate(image_s_blur,template, cv2.TM_CCOEFF_NORMED)
 
         cv2.imwrite(
-            folder_path + "/" + image.data["Name"][:-4] + "-edit.png", img
+            folder_path + "/" + image.data["Name"][:-4] + "-edit.png", template_matched
         )
         image.data["Edit Img"] = folder_path + "/" + \
             image.data["Name"][:-4] + "-edit.png"
