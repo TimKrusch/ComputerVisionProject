@@ -18,4 +18,3 @@
         image.data["Edit Img"]=folder_path + "/" + image.data["Name"][:-4] + "-edit.png"
 
     return imagelist
-    
