@@ -39,12 +39,12 @@ def identify2(imagelist, folder_path):
                 cv2.circle(img,(i[0],i[1]),2,(0,0,255),3)
 
         
-        #img=temp_match('achtung.jpg',(11,11,255),img,image_s,0.7)
+        img=temp_match('achtung.jpg',(11,11,255),img,image_s,0.7)
         img=temp_match('achtung2.jpg',(11,11,255),img,image_s,0.73)
             #img=temp_match('gebot.jpg',(255,11,11),img,image_s,0.875)
-        #img=temp_match('stop.jpg',(255,11,255),img,image_s,0.85)
+        img=temp_match('stop.jpg',(255,11,255),img,image_s,0.85)
             #img=temp_match('haupt.jpg',(11,255,255),img,image_s,0.8)
-        #img=temp_match('Vf_g.jpg',(11,255,11),img,image_s,0.7)
+        img=temp_match('Vf_g.jpg',(11,255,11),img,image_s,0.7)
 
         cv2.imwrite(
             folder_path + "/" + image.data["Name"][:-4] + "-edit.png", image_s
