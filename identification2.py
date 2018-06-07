@@ -14,7 +14,7 @@ def identify2(imagelist, folder_path):
 
         # apply gamma correction and show the images
         image_edit = adjust_gamma(image_edit, gamma=5.0)
-
+       
         image_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
         image_s = image_hsv[:,:,1]
@@ -23,14 +23,14 @@ def identify2(imagelist, folder_path):
 
 
         circles = cv2.HoughCircles(image_s_blur,cv2.HOUGH_GRADIENT,1,40,
-                            param1=100,param2=40,minRadius=5,maxRadius=75)
+                            param1=100,param2=40,minRadius=4,maxRadius=75)
 
         #print(circles)
 
         if circles is not None:
         
             #print(circles)
-            #circles = np.uint64(np.around(circles))
+            circles = np.uint64(np.around(circles))
 
             for i in circles[0,:]:
                 # draw the outer circle
@@ -38,31 +38,16 @@ def identify2(imagelist, folder_path):
                 # draw the center of the circle
                 cv2.circle(img,(i[0],i[1]),2,(0,0,255),3)
 
-        template = cv2.imread('achtung.jpg')
-        template_hsv = cv2.cvtColor(template, cv2.COLOR_BGR2HSV)
-
-        template_s = template_hsv[:,:,1]
-
-        #template_matched = cv2.matchTemplate(image_s,template, cv2.TM_CCOEFF)
-        template_matched = cv2.matchTemplate(image_s, template_s, cv2.TM_CCORR_NORMED)
-
-        threshold = 0.7
-        loc = np.where( template_matched >= threshold)
         
-        for pt in zip(*loc[::-1]):
-            cv2.rectangle(img, pt, (pt[0] + 100, pt[1] + 100), (0,255,255), 2)
-
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(template_matched)
-        print(max_val)
-
-        if max_val>0.700:
-            top_left = max_loc
-            bottom_right = (top_left[0] + 100, top_left[1] + 100)
-            cv2.rectangle(img, top_left, bottom_right, 255, 4)
-
+        #img=temp_match('achtung.jpg',(11,11,255),img,image_s,0.7)
+        img=temp_match('achtung2.jpg',(11,11,255),img,image_s,0.73)
+            #img=temp_match('gebot.jpg',(255,11,11),img,image_s,0.875)
+        #img=temp_match('stop.jpg',(255,11,255),img,image_s,0.85)
+            #img=temp_match('haupt.jpg',(11,255,255),img,image_s,0.8)
+        #img=temp_match('Vf_g.jpg',(11,255,11),img,image_s,0.7)
 
         cv2.imwrite(
-            folder_path + "/" + image.data["Name"][:-4] + "-edit.png", img
+            folder_path + "/" + image.data["Name"][:-4] + "-edit.png", image_s
         )
         image.data["Edit Img"] = folder_path + "/" + \
             image.data["Name"][:-4] + "-edit.png"
@@ -79,3 +64,29 @@ def adjust_gamma(image, gamma):
 
     # apply gamma correction using the lookup table
     return cv2.LUT(image, table)
+
+
+def temp_match(schild,farbe,img,img_s,thres):
+    template = cv2.imread(schild)
+    template_hsv = cv2.cvtColor(template, cv2.COLOR_BGR2HSV)
+
+    template_s = template_hsv[:,:,1]
+
+    #template_matched = cv2.matchTemplate(image_s,template, cv2.TM_CCOEFF)
+    template_matched = cv2.matchTemplate(img_s, template_s, cv2.TM_CCORR_NORMED)
+
+    threshold = thres
+    loc = np.where( template_matched >= threshold)
+    
+    for pt in zip(*loc[::-1]):
+        cv2.rectangle(img, pt, (pt[0] + 50, pt[1] + 50), farbe, 2)
+
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(template_matched)
+    print(max_val)
+
+    #if max_val>0.700:
+    #    top_left = max_loc
+    #    bottom_right = (top_left[0] + 100, top_left[1] + 100)
+    #    cv2.rectangle(img, top_left, bottom_right, farbe, 4)
+
+    return img

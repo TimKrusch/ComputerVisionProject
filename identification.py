@@ -83,7 +83,7 @@ def identify(imagelist, folder_path):
 
 
         cv2.imwrite(
-            folder_path + "/" + image.data["Name"][:-4] + "-edit.png", img
+            folder_path + "/" + image.data["Name"][:-4] + "-edit.png", mask
         )
         image.data["Edit Img"] = folder_path + "/" + \
             image.data["Name"][:-4] + "-edit.png"
