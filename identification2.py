@@ -25,11 +25,11 @@ def identify2(imagelist, folder_path):
         circles = cv2.HoughCircles(image_s_blur,cv2.HOUGH_GRADIENT,1,40,
                             param1=100,param2=40,minRadius=5,maxRadius=75)
 
-        print(circles)
+        #print(circles)
 
         if circles is not None:
         
-            print(circles)
+            #print(circles)
             #circles = np.uint64(np.around(circles))
 
             for i in circles[0,:]:
@@ -38,12 +38,31 @@ def identify2(imagelist, folder_path):
                 # draw the center of the circle
                 cv2.circle(img,(i[0],i[1]),2,(0,0,255),3)
 
-        template = cv2.imread('hauptstrasse.png',0)
+        template = cv2.imread('achtung.jpg')
+        template_hsv = cv2.cvtColor(template, cv2.COLOR_BGR2HSV)
 
-        template_matched = cv2.matchTemplate(image_s,template, cv2.TM_CCOEFF)
+        template_s = template_hsv[:,:,1]
+
+        #template_matched = cv2.matchTemplate(image_s,template, cv2.TM_CCOEFF)
+        template_matched = cv2.matchTemplate(image_s, template_s, cv2.TM_CCORR_NORMED)
+
+        threshold = 0.7
+        loc = np.where( template_matched >= threshold)
+        
+        for pt in zip(*loc[::-1]):
+            cv2.rectangle(img, pt, (pt[0] + 100, pt[1] + 100), (0,255,255), 2)
+
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(template_matched)
+        print(max_val)
+
+        if max_val>0.700:
+            top_left = max_loc
+            bottom_right = (top_left[0] + 100, top_left[1] + 100)
+            cv2.rectangle(img, top_left, bottom_right, 255, 4)
+
 
         cv2.imwrite(
-            folder_path + "/" + image.data["Name"][:-4] + "-edit.png", template_matched
+            folder_path + "/" + image.data["Name"][:-4] + "-edit.png", img
         )
         image.data["Edit Img"] = folder_path + "/" + \
             image.data["Name"][:-4] + "-edit.png"
