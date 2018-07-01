@@ -26,6 +26,7 @@
   <ItemGroup>
     <Compile Include="GUI.py" />
     <Compile Include="identification.py" />
+    <Compile Include="identification3.py" />
     <Compile Include="main.py" />
     <Compile Include="identification2.py">
       <SubType>Code</SubType>

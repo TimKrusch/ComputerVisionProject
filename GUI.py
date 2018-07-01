@@ -8,6 +8,7 @@ import shutil
 
 from identification import identify
 from identification2 import identify2
+from identification3 import identify3
 
 class Singleton(type):
     _instances = {}
@@ -19,11 +20,14 @@ class Singleton(type):
 
 class Picture_Data(object):
     def __init__(self,name,filepath,gtfilepath,gtdata,edit_filepath):
-        self.data = {"Name": name, "File Path": filepath, "GT File Path": gtfilepath , "GT Data": gtdata, "Edit Img":edit_filepath}
+        self.data = {"Name": name, "File Path": filepath, "GT File Path": gtfilepath , "GT Data": gtdata, "Edit Img":edit_filepath, "Result Data": ""}
     #data = {"Name": "", "File Path": "", "GT File Path": "" , "GT Data": ""}
 
 
 class myUI(Frame, metaclass=Singleton):
+
+    result_global_A, result_global_V, anzahl_A, anzahl_V, anzahl_A_B, anzahl_V_B, anzahl_A_FP, anzahl_V_FP = 0,0,0,0,0,0,0,0
+    result_global_S, result_global_G, anzahl_S, anzahl_G, anzahl_S_B, anzahl_G_B, anzahl_S_FP, anzahl_G_FP = 0,0,0,0,0,0,0,0
 
     def __init__(self):
         Frame.__init__(self)
@@ -93,6 +97,10 @@ class myUI(Frame, metaclass=Singleton):
         
         self.gt_text_label = Label(self.master, text="",background="gray80")
         self.gt_text_label.grid(row = 3, column=5)
+
+        self.result_text_label = Label(self.master, text="",background="gray80", justify=LEFT)
+        self.result_text_label.grid(row = 3, column=3,)
+
         if len(self.pictures_data)==0:
             self.filename_label = Label(self.master, text="",background="gray80")
             self.filename_label.grid(row = 0, column=1,sticky=W+E)
@@ -224,6 +232,17 @@ class myUI(Frame, metaclass=Singleton):
         #draw Ground Truth Data
         self.gt_text_label.configure(text="Ground Truth Data :\n"+Img.data["GT Data"])
 
+         #draw Result Data
+        self.result_text_label.configure(text=
+            "\n\nResult Global: \nAnzahl Achtung:\t" + str(self.result_global_A) + " von " + str(self.anzahl_A) + " Schildern; in " + str(self.anzahl_A_B) + " Bildern mit Achtungszeichen"
+            "\nFP Achtung: " + str(self.anzahl_A_FP) + "\nAnzahl Verbot:\t" + str(self.result_global_V) + " von " + str(self.anzahl_V) + " Schildern; in " + str(self.anzahl_V_B) + 
+            " Bildern mit Verbotszeichen\nFP Verbot: " + str(self.anzahl_V_FP) + 
+            "\nAnzahl Stop:\t" + str(self.result_global_S) + " von " + str(self.anzahl_S) + " Schildern; in " + str(self.anzahl_S_B) + 
+            " Bildern mit Stopzeichen\nFP Stop: " + str(self.anzahl_S_FP) +
+            "\nAnzahl Vorfahrtgewähren:\t" + str(self.result_global_G) + " von " + str(self.anzahl_G) + " Schildern; in " + str(self.anzahl_G_B) + 
+            " Bildern mit Vorfahrtgewährenzeichen\nFP Vorfahrtgewähren: " + str(self.anzahl_G_FP))
+
+
         #draw Button for iteration back through the images
         if self.currentDisplayedResult > 1:
             self.back = Button(self.master, text="<", command=lambda: self.switchDisplayedImage(-1))
@@ -248,7 +267,7 @@ class myUI(Frame, metaclass=Singleton):
 
 
     def identify_signs(self):
-        
+
         edit_folder_path = self.pictures_data[0].data["File Path"].rpartition("/")[0].rpartition("/")[0]+"/edit_folder"
         if os.path.isdir(edit_folder_path):
             result = messagebox.askquestion("Delete", "There is a Edit-Image-Folder! Delete it?", icon='warning')
@@ -257,7 +276,8 @@ class myUI(Frame, metaclass=Singleton):
         
         os.mkdir(edit_folder_path)
 
-        identify2(self.pictures_data,edit_folder_path)
+        ##### Identificate the Signs #####
+        self.pictures_data, self.result_global_A, self.result_global_V,self.anzahl_A,self.anzahl_V, self.anzahl_A_B, self.anzahl_V_B, self.anzahl_A_FP, self.anzahl_V_FP, self.result_global_S, self.result_global_G, self.anzahl_S, self.anzahl_G, self.anzahl_S_B, self.anzahl_G_B, self.anzahl_S_FP, self.anzahl_G_FP= identify3(self.pictures_data,edit_folder_path)
         
         self.display_result(self.pictures_data[self.currentDisplayedResult-1])
 
