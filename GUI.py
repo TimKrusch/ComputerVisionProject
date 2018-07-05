@@ -7,8 +7,6 @@ import os
 import shutil
 
 from identification import identify
-from identification2 import identify2
-from identification3 import identify3
 
 class Singleton(type):
     _instances = {}
@@ -277,7 +275,7 @@ class myUI(Frame, metaclass=Singleton):
         os.mkdir(edit_folder_path)
 
         ##### Identificate the Signs #####
-        self.pictures_data, self.result_global_A, self.result_global_V,self.anzahl_A,self.anzahl_V, self.anzahl_A_B, self.anzahl_V_B, self.anzahl_A_FP, self.anzahl_V_FP, self.result_global_S, self.result_global_G, self.anzahl_S, self.anzahl_G, self.anzahl_S_B, self.anzahl_G_B, self.anzahl_S_FP, self.anzahl_G_FP= identify3(self.pictures_data,edit_folder_path)
+        self.pictures_data, self.result_global_A, self.result_global_V,self.anzahl_A,self.anzahl_V, self.anzahl_A_B, self.anzahl_V_B, self.anzahl_A_FP, self.anzahl_V_FP, self.result_global_S, self.result_global_G, self.anzahl_S, self.anzahl_G, self.anzahl_S_B, self.anzahl_G_B, self.anzahl_S_FP, self.anzahl_G_FP= identify(self.pictures_data,edit_folder_path)
         
         self.display_result(self.pictures_data[self.currentDisplayedResult-1])
 

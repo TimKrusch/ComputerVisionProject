@@ -6,15 +6,13 @@ import os
 import numpy as np
 import imutils
 
-from sklearn.cluster import MiniBatchKMeans
-
 anzahl_A_mark=0
 anzahl_V_mark=0
 anzahl_S_mark=0
 anzahl_G_mark=0
 
 
-def identify3(imagelist, folder_path):
+def identify(imagelist, folder_path):
     global anzahl_A_mark
     global anzahl_V_mark
     global anzahl_S_mark
@@ -219,7 +217,7 @@ def identify3(imagelist, folder_path):
         ##### Save edited Pics #####
 
         cv2.imwrite(
-            folder_path + "/" + image.data["Name"][:-4] + "-edit.png", image_r_thresh
+            folder_path + "/" + image.data["Name"][:-4] + "-edit.png", image_matched
         )
         image.data["Edit Img"] = folder_path + "/" + \
             image.data["Name"][:-4] + "-edit.png"
